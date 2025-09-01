@@ -1,0 +1,4 @@
+# Static folder
+
+Store font files (.ttf), image files (.jpg, .png), icon files (.svg) and lottie files (.json) in this folder.
+Those files should be made available at runtime through the [resources](../resources) folder.

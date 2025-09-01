@@ -1,50 +1,280 @@
-# Welcome to your Expo app 👋
+# 🚀 Expo Feature-Rich Starter Pack
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A comprehensive Expo app starter pack. This starter includes Supabase backend integration, GraphQL code generation, React Query for state management, typesafe internationalization, and RNUIlib UI component library.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+### 🔐 Authentication & Backend
 
-   ```bash
-   npm install
-   ```
+- **Supabase Integration** - Authentication system with session management
+- **GraphQL Code Generation** - Auto-generated TypeScript types and React Query hooks
+- **React Query (TanStack Query)** - Powerful data fetching and caching
+- **Multi-environment Support** - Development, preview, and production configurations
 
-2. Start the app
+### 🌍 Internationalization
 
-   ```bash
-   npx expo start
-   ```
+- **Typesafe i18n** - Type-safe internationalization with automatic type generation
+- **Multi-language Support** - Built-in French translations with extensible structure
+- **Locale Detection** - Automatic locale detection and fallback handling
 
-In the output, you'll find options to open the app in a
+### 🎨 UI & Components
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **React Native UI Lib** - Comprehensive UI component library
+- **Custom UI Components** - Pre-built components with consistent design system
+- **Animation Support** - Smooth animations with Reanimated and Lottie
+- **Responsive Design** - Cross-platform responsive layouts
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📋 Prerequisites
 
-## Get a fresh project
+- Node.js 18+
+- npm or yarn
+- Expo CLI
+- Supabase account
 
-When you're ready, run:
+## 🚀 Quick Start
+
+### 1. Clone and Install
 
 ```bash
-npm run reset-project
+git clone <your-repo-url>
+cd <cloned-folder>
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Environment Setup
 
-## Learn more
+Create a `.env` file in the root directory:
 
-To learn more about developing your project with Expo, look at the following resources:
+```env
+# Supabase Configuration
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# App Variant (development/preview/production)
+APP_VARIANT=development
 
-## Join the community
+or call the npm scripts using cross-env
+```
 
-Join our community of developers creating universal apps.
+### 3. Start Development
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+# Start development server
+npm run start:dev
+
+# Run on Android
+npm run android:dev
+
+# Run on iOS
+npm run ios:dev
+
+# Run on Web
+npm run web:dev
+```
+
+## 🏗 Project Structure
+
+```
+├── app/                    # Expo Router pages
+├── src/
+│   ├── features/          # Feature modules
+│   │   └── auth/          # Authentication feature
+│   ├── i18n/              # Internationalization
+│   ├── lib/ui/            # UI components library façade
+│   ├── localization/      # Localization utilities
+│   ├── resources/         # Assets and themes
+│   └── utils/             # Utility functions
+├── static/                # Static assets
+├── patches/               # Package patches (temporary -- fix for a bug in rnuilib with android new architecture)
+└── config files...
+```
+
+## 🔧 Configuration
+
+### Supabase Setup
+
+1. Create a new Supabase project
+2. Update your `.env` file with project credentials
+3. Configure authentication providers as needed (default login screen uses otp)
+
+### GraphQL Code Generation
+
+The project uses GraphQL Code Generator to automatically generate TypeScript types and React Query hooks:
+
+```bash
+# Generate types and hooks (watch mode enabled)
+npm run generate
+```
+
+### Internationalization
+
+Add new languages by creating translation files in `src/i18n/`:
+
+```bash
+# Generate types for new translations
+npm run ti18n
+```
+
+## 📱 Available Scripts
+
+### Development
+
+```bash
+npm run start:dev          # Start development server
+npm run android:dev        # Run on Android
+npm run ios:dev           # Run on iOS
+npm run web:dev           # Run on Web
+```
+
+### Building
+
+```bash
+npm run prebuild:dev      # Prebuild for development
+npm run rebuild:dev       # Clean prebuild for development
+```
+
+### Code Quality
+
+```bash
+npm run lint              # Run ESLint
+npm run format            # Format code with Prettier
+npm run format:check      # Check code formatting
+```
+
+### EAS Build
+
+```bash
+npm run eas:preview       # Build preview APK
+npm run eas:preview:info  # Get project info
+npm run eas:preview:update # Update preview build
+```
+
+## 🎯 Key Features Explained
+
+### GraphQL with React Query
+
+Auto-generated hooks for type-safe GraphQL operations:
+
+```typescript
+import { useGetUsersQuery } from '@/graphql/graphql'
+
+function UsersList() {
+  const { data, loading, error } = useGetUsersQuery()
+
+  if (loading) return <Spinner />
+  if (error) return <Text>Error: {error.message}</Text>
+
+  return (
+    <View>
+      {data?.users?.map(user => (
+        <Text key={user.id}>{user.name}</Text>
+      ))}
+    </View>
+  )
+}
+```
+
+### Internationalization
+
+Type-safe translations with automatic completion:
+
+```typescript
+import { useLocalization } from '@/localization'
+
+function WelcomeScreen() {
+  const { LL } = useLocalization()
+
+  return (
+    <View>
+      <Text>{LL.auth.welcome()}</Text>
+      <Text>{LL.auth.loginButton()}</Text>
+    </View>
+  )
+}
+```
+
+### UI Components
+
+Consistent design system with pre-built components:
+
+```typescript
+import { View, Text, Button, Surface } from '@/lib/ui'
+
+function MyScreen() {
+  return (
+   <View bg-screenBG padding-16>
+      <Surface bg-backgroundPrimaryLight center>
+        <Text $textNeutral text70BO>Welcome</Text>
+        <Button label="Get Started" onPress={() => {}} />
+      </Surface>
+   </View>
+  )
+}
+```
+
+## 🔄 Multi-Environment Support
+
+The app supports three environments with different configurations:
+
+- **Development**: Local development with hot reload
+- **Preview**: Staging environment for testing
+- **Production**: Production-ready builds
+
+Each environment has its own:
+
+- App identifier (bundle ID/package name)
+- Supabase project
+- GraphQL endpoint
+- Build configuration
+
+## 📦 Dependencies
+
+### Core
+
+- **Expo SDK 53** - Latest Expo SDK with all features
+- **React Native 0.79** - Latest React Native version
+- **TypeScript** - Full type safety
+- **zustand** - State management
+
+### Backend & Data
+
+- **@supabase/supabase-js** - Supabase client
+- **@tanstack/react-query** - Data fetching and caching
+- **graphql** - GraphQL client
+- **@graphql-codegen/cli** - Code generation
+
+### UI & Animation
+
+- **react-native-ui-lib** - UI component library
+- **react-native-reanimated** - Animations
+- **lottie-react-native** - Lottie animations
+- **@shopify/react-native-skia** - Image library
+
+### Internationalization
+
+- **typesafe-i18n** - Type-safe i18n
+- **@formatjs/intl-\*** - Intl polyfills
+
+### Development
+
+- **expo-dev-client** - Development client
+- **@dev-plugins/react-query** - React Query dev tools
+
+## 🚀 Deployment
+
+### EAS Build
+
+The project is configured for EAS Build with multiple profiles (in eas.json):
+
+```bash
+# Build development APK
+eas build --profile development --platform android
+
+# Build preview APK
+eas build --profile preview --platform android
+
+# Build production
+eas build --profile production --platform android
+```
+
+Built with ❤️ and with continuous improvement in mind.

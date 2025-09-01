@@ -1,0 +1,18 @@
+# Screens folder
+
+Organize the screens of the app as needed in this folder.
+These screen components are then imported in the expo-router app folder, to build the screens of the app.
+This organization is useful to not mix expo-router code with business code, and not being constrained
+by expo-router conventions present in the app folder.
+
+
+Example of structure:
+
+-- auth
+---- otp.tsx
+-- dashboard
+---- components
+------ MyLocalComponent.tsx
+---- screen-using-my-local-component.tsx
+-- status
+---- error.tsx

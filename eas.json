@@ -1,0 +1,27 @@
+{
+  "cli": {
+    "version": ">= 3.2.1"
+  },
+  "build": {
+    "/** This generates a development build debug apk for android, that must connects to a development server to run the app */": {},
+    "development": {
+      "distribution": "internal",
+      "developmentClient": true
+    },
+    "/** This generates a preview build debug and release apk for android. The release apk is a standalone build. */": {},
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "APP_VARIANT": "preview",
+        "SUPABASE_ANON_KEY": "anon_key_of_preview_project"
+      }
+    },
+    "production": {}
+  },
+  "submit": {
+    "production": {}
+  }
+}
