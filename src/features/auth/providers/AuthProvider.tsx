@@ -1,11 +1,10 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Session } from '@supabase/supabase-js'
 
 import * as React from 'react'
 
 import { View } from '@/lib/ui'
 import { DefaultLoading } from '@/screens/status/loading'
 
-import { getSession } from '../api'
 import { supabase } from '../supabase'
 import { AuthContextType } from '../types'
 
@@ -14,22 +13,24 @@ export const AuthContext = React.createContext<AuthContextType | null>(null)
 export const AuthProvider: React.FC<{
   children: React.ReactNode
 }> = ({ children }) => {
-  const queryClient = useQueryClient()
+  const [isPending, setIsPending] = React.useState(true)
+  const [session, setSession] = React.useState<Session | null>(null)
 
   React.useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      queryClient.setQueryData(getSession.queryKey, session)
+      console.log('auth state changed -- new session id', session?.user.id)
+      setIsPending(false)
+      setSession(session)
     })
 
     return () => {
       subscription.unsubscribe()
     }
-  }, [queryClient])
+  }, [])
 
-  const { data: session, isLoading } = useQuery(getSession)
-  if (isLoading) {
+  if (isPending) {
     return (
       <View flex bg-screenBG>
         <DefaultLoading />

@@ -17,6 +17,33 @@ function checkEmail(email: string): boolean {
   return emailRegex.test(email)
 }
 
+// Error handling utilities
+const showErrorAlert = (title: string, message: string, onDismiss?: () => void) => {
+  Alert.alert(title, message, [
+    {
+      text: 'OK',
+      style: 'cancel',
+      onPress: onDismiss,
+    },
+  ])
+}
+
+const showConfirmationAlert = (
+  title: string,
+  message: string,
+  primaryAction: { text: string; onPress: () => void },
+  onCancel?: () => void
+) => {
+  Alert.alert(title, message, [
+    primaryAction,
+    {
+      text: 'Cancel',
+      style: 'cancel',
+      onPress: onCancel,
+    },
+  ])
+}
+
 export default function SignInWithOtpScreen() {
   const { LL } = useLocalization()
   const [email, setEmail] = React.useState('')
@@ -66,10 +93,11 @@ export default function SignInWithOtpScreen() {
       try {
         const session = await createSessionFromUrl(url)
         if (session) {
-          console.log('Successfully authenticated:', session)
+          console.log('Successfully authenticated !')
         }
       } catch (error) {
         console.error('Error creating session:', error)
+        showErrorAlert('Authentication Error', 'Failed to authenticate. Please try again.')
       }
     })
 
@@ -84,6 +112,7 @@ export default function SignInWithOtpScreen() {
           }
         } catch (error) {
           console.error('Error creating session:', error)
+          showErrorAlert('Authentication Error', 'Failed to authenticate. Please try again.')
         }
       }
     })
@@ -95,10 +124,10 @@ export default function SignInWithOtpScreen() {
 
   const scheme = Constants.expoConfig?.scheme
   console.log('app scheme is:', scheme)
-  async function signInWithOtp() {
+
+  const sendOtpEmail = async (): Promise<void> => {
     if (typeof scheme !== 'string') {
-      Alert.alert('App scheme is not correctly configured: ' + scheme)
-      return
+      throw new Error(`App scheme is not correctly configured: ${scheme}`)
     }
 
     const metadata = isSignupMode
@@ -108,7 +137,6 @@ export default function SignInWithOtpScreen() {
         }
       : undefined
 
-    setLoading(true)
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -117,121 +145,103 @@ export default function SignInWithOtpScreen() {
       },
     })
 
-    if (error) Alert.alert(error.message)
-    else Alert.alert(LL.auth.checkEmail({ email }))
-    setLoading(false)
+    if (error) throw error
+  }
+
+  const checkEmailExists = async (): Promise<boolean> => {
+    const { data, error } = await supabase.rpc('check_email_exists', {
+      email_to_check: email,
+    })
+
+    if (error) throw error
+    return data
   }
 
   const handleSubmit = async () => {
-    let emailExists = false
     setLoading(true)
+
     try {
-      const { data, error: checkError } = await supabase.rpc('check_email_exists', {
-        email_to_check: email,
-      })
-      emailExists = data
-      if (checkError) {
-        console.error('Error checking email existence:', checkError)
-        Alert.alert('Error checking email existence:', checkError.message, [
-          {
-            text: 'OK',
-            style: 'cancel',
-            onPress: () => {
-              setLoading(false)
-            },
-          },
-        ])
+      // Check app configuration
+      if (typeof scheme !== 'string') {
+        showErrorAlert('Configuration Error', `App scheme is not correctly configured: ${scheme}`)
         return
       }
-    } catch (error) {
-      console.error('Error checking email existence:', error)
-      Alert.alert('Error checking email existence:', error as string, [
-        {
-          text: 'OK',
-          style: 'cancel',
-          onPress: () => {
-            setLoading(false)
-          },
-        },
-      ])
-      return
-    }
 
-    console.log('emailExists', emailExists)
-    if (isSignupMode) {
-      if (emailExists) {
-        // Email already exists, show appropriate message
-        Alert.alert(
-          'Account Already Exists',
-          'An account with this email already exists. Please sign in instead.',
-          [
+      // Check email existence
+      let emailExists: boolean
+      try {
+        emailExists = await checkEmailExists()
+      } catch (error) {
+        console.error('Error checking email existence:', error)
+        showErrorAlert(
+          'Error checking email existence:',
+          error instanceof Error ? error.message : String(error)
+        )
+        return
+      }
+
+      console.log('emailExists', emailExists)
+
+      // Handle signup mode
+      if (isSignupMode) {
+        if (emailExists) {
+          showConfirmationAlert(
+            'Account Already Exists',
+            'An account with this email already exists. Please sign in instead.',
             {
               text: 'Switch to Sign In',
               onPress: () => {
                 setIsSignupMode(false)
                 setLoading(false)
               },
-            },
-            {
-              text: 'Cancel',
-              style: 'cancel',
-              onPress: () => setLoading(false),
-            },
-          ]
-        )
-        return
-      }
+            }
+          )
+          return
+        }
 
-      try {
-        // Email doesn't exist, proceed with signup
-        console.log('Email does not exist, proceeding with signup')
-        await signInWithOtp()
-      } catch (error) {
-        console.error('Error in signup flow:', error)
-        Alert.alert('Error in signup flow:', error as string, [
-          {
-            text: 'OK',
-            style: 'cancel',
-            onPress: () => {
-              setLoading(false)
-            },
-          },
-        ])
+        // Proceed with signup
+        try {
+          await sendOtpEmail()
+          console.log('OTP email sent successfully for signup')
+          showErrorAlert('Success', LL.auth.checkEmail({ email }))
+        } catch (error) {
+          console.error('Error in signup flow:', error)
+          showErrorAlert(
+            'Error in signup flow:',
+            error instanceof Error ? error.message : String(error)
+          )
+          return
+        }
       }
-    } else {
-      if (!emailExists) {
-        Alert.alert('Email does not exist', 'Please sign up first', [
-          {
+      // Handle signin mode
+      else {
+        if (!emailExists) {
+          showConfirmationAlert('Email does not exist', 'Please sign up first', {
             text: 'Switch to sign up',
             onPress: () => {
               setIsSignupMode(true)
               setLoading(false)
             },
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              setLoading(false)
-            },
-          },
-        ])
-        return
+          })
+          return
+        }
+
+        // Proceed with signin
+        try {
+          await sendOtpEmail()
+          console.log('OTP email sent successfully for signin')
+          showErrorAlert('Success', LL.auth.checkEmail({ email }))
+        } catch (error) {
+          console.error('Error in signin flow:', error)
+          showErrorAlert(
+            'Error in signin flow:',
+            error instanceof Error ? error.message : String(error)
+          )
+          return
+        }
       }
-      try {
-        await signInWithOtp()
-      } catch (error) {
-        console.error('Error in signin flow:', error)
-        Alert.alert('Error in signin flow:', error as string, [
-          {
-            text: 'OK',
-            style: 'cancel',
-            onPress: () => {
-              setLoading(false)
-            },
-          },
-        ])
-      }
+    } finally {
+      setLoading(false)
     }
   }
 
