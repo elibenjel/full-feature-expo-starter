@@ -151,9 +151,18 @@ npm run eas:preview:update # Update preview build
 
 ## 🎯 Key Features Explained
 
+### Supabase Auth
+
+Built-in login flow, assuming a supabase project is setup and available to the app.
+Things to configure:
+
+- a supabase project with otp signup enabled, and redirect urls configured to redirect to the scheme of the app
+- a .env file with SUPABASE_ANON_KEY variable set to the anon key of the supabase project
+- the supabase project should have a check_email_exists function defined in the public schema, returning a boolean
+
 ### GraphQL with React Query
 
-Auto-generated hooks for type-safe GraphQL operations:
+Auto-generated hooks for type-safe GraphQL operations.
 
 ```typescript
 import { useGetUsersQuery } from '@/graphql/graphql'
@@ -173,6 +182,16 @@ function UsersList() {
   )
 }
 ```
+
+The variable SUPABASE_URL must be set in .env, to the url of the supabase project.
+Then codegen can be ran with:
+
+```bash
+npm run generate
+```
+
+It will fetch the schema through the graphql endpoint of the supabase project, and generate types and hooks based
+on the graphql document queries found in the folder app, in .graphql files
 
 ### Internationalization
 

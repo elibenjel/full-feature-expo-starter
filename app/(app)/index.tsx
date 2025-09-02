@@ -6,8 +6,10 @@ export default function Screen() {
   const { userId } = useAuth()
   const { LL } = useLocalization()
   return (
-    <View bg-screenBG center>
-      <Text $textNeutral>{LL.youAreConnected({ userId })}</Text>
+    <View bg-screenBG flex center>
+      <Text center $textNeutral>
+        {LL.youAreConnected(userId)}
+      </Text>
     </View>
   )
 }

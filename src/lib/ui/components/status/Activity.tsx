@@ -1,4 +1,5 @@
 import {
+  Locale,
   addWeeks,
   eachDayOfInterval,
   eachWeekOfInterval,
@@ -12,8 +13,6 @@ import {
 import * as React from 'react'
 import { GestureResponderEvent } from 'react-native'
 import { Colors } from 'react-native-ui-lib'
-
-import { useLocalization } from '@/features/localization/hooks'
 
 import Text from '../basic/Text'
 import Touchable from '../basic/Touchable'
@@ -32,6 +31,7 @@ interface ActivityProps {
   cellSize?: number
   onDayPressed?: (day: Date) => void
   getCellStyle?: (day: Date) => ViewProps['style']
+  dateFnsLocale?: Locale
 }
 
 interface CellData extends DayActivity {
@@ -47,9 +47,8 @@ export default function Activity({
   cellSize = 10,
   onDayPressed,
   getCellStyle,
+  dateFnsLocale,
 }: ActivityProps) {
-  const { dateFnsLocale } = useLocalization()
-
   const now = new Date()
   const firstDayOfFirstWeek = startOfWeek(subWeeks(now, backwardWeeks), { locale: dateFnsLocale })
   const firstDayOfLastWeek = startOfWeek(addWeeks(now, forwardWeeks), { locale: dateFnsLocale })
